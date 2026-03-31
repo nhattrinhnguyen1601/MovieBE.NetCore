@@ -3,7 +3,14 @@
 A backend API for managing movies, episodes, and video content, built with ASP.NET Core using a layered architecture.
 
 ---
+## 🚀 Live Demo
 
+- API: https://moviebenetcore-production.up.railway.app  
+- Swagger UI: https://moviebenetcore-production.up.railway.app/swagger  
+- Hangfire Dashboard: https://moviebenetcore-production.up.railway.app/hangfire  
+> 🔐 Note: Access to Hangfire Dashboard requires a valid JWT token (use browser extension to attach Authorization header).
+
+---
 ## 🚀 Overview
 
 This project provides a RESTful API for:
