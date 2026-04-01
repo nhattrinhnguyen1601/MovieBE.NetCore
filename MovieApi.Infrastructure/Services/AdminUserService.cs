@@ -58,14 +58,30 @@ public sealed class AdminUserService : IAdminUserService
 
     public async Task LockAsync(long id, CancellationToken ct = default)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id, ct);
+        var user = await _db.Users
+                        .Include(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
+                        .FirstOrDefaultAsync(x => x.Id == id, ct);
         if (user is null)
         {
             throw new NotFoundException(
                 "USER_NOT_FOUND",
                 $"User with id {id} was not found.");
         }
-
+        var isAdmin = user.UserRoles.Any(Ur => Ur.Role.Name == "Admin");
+        if(isAdmin  && user.Status == UserStatus.Active)
+        {
+            var activeAdminsCount = await _db.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .Where(u => u.Status == UserStatus.Active && u.UserRoles.Any(ur => ur.Role.Name == "Admin"))
+                .CountAsync(ct);
+            if (activeAdminsCount <= 1){
+                throw new ConflictException(
+                    "LAST_ADMIN_LOCK",
+                    "Cannot lock the last active admin user.");
+            }
+        }
         user.Status = UserStatus.Locked;
         await _db.SaveChangesAsync(ct);
     }
